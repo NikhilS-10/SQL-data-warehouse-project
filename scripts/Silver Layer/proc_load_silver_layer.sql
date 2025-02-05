@@ -58,7 +58,7 @@ begin try
 	select *,
 	row_number() over(partition by cst_id order by cst_createdate desc) as flag
 	from bronze.crm_cust_info )t
-	where flag = 1
+	where flag = 1 and cst_id is not null
 
 
 	set @endtime = getdate();
