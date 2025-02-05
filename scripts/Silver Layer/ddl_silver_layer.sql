@@ -1,3 +1,4 @@
+
 /*
 =============================================================
  DDL Scripts :-  Create Tables For Silver Layer
@@ -12,7 +13,9 @@ WARNING:
     and ensure you have proper backups before running this script.
 */
 
-
+-- =============================================================
+---- Creating 'silver.crm_cust_info' Table ----
+-- =============================================================
 
 if object_id('silver.crm_cust_info' , 'U') is not null
    drop table silver.crm_cust_info;
@@ -27,6 +30,10 @@ create table silver.crm_cust_info(
 	dwh_createdate datetime2 default getdate()
 );
 
+-- =============================================================
+---- Creating 'silver.crm_prd_info' Table ----
+-- =============================================================
+
 if object_id('silver.crm_prd_info' , 'U') is not null
    drop table silver.crm_prd_info;
 create table silver.crm_prd_info(
@@ -40,6 +47,10 @@ create table silver.crm_prd_info(
 	prd_end_dt date,
 	dwh_createdate datetime2 default getdate()
 );
+
+-- =============================================================
+---- Creating 'silver.crm_sales_details' Table ----
+-- =============================================================
 
 if object_id('silver.crm_sales_details' , 'U') is not null
    drop table silver.crm_sales_details;
@@ -56,6 +67,9 @@ create table silver.crm_sales_details(
 	dwh_createdate datetime2 default getdate()
 );
  
+ -- =============================================================
+---- Creating 'silver.erp_CUST_AZ12' Table ----
+-- =============================================================
 
 if object_id('silver.erp_CUST_AZ12' , 'U') is not null
    drop table silver.erp_CUST_AZ12;
@@ -66,6 +80,10 @@ create table silver.erp_CUST_AZ12(
 	dwh_createdate datetime2 default getdate()
 	);
 
+-- =============================================================
+---- Creating 'silver.erp_LOC_A101' Table ----
+-- =============================================================
+
 if object_id('silver.erp_LOC_A101' , 'U') is not null
    drop table silver.erp_LOC_A101;
 create table silver.erp_LOC_A101(
@@ -73,6 +91,10 @@ create table silver.erp_LOC_A101(
 	cntry varchar(20),
 	dwh_createdate datetime2 default getdate()
 	);
+
+-- =============================================================
+---- Creating 'silver.erp_PX_CAT_G1V2' Table ----
+-- =============================================================
 
 if object_id('silver.erp_PX_CAT_G1V2' , 'U') is not null
    drop table silver.erp_PX_CAT_G1V2;
