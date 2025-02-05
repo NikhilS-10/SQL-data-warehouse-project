@@ -12,7 +12,9 @@ WARNING:
     and ensure you have proper backups before running this script.
 */
 
-
+-- =============================================================
+---- Creating 'bronze.crm_cust_info' Table ----
+-- =============================================================
 
 if object_id('bronze.crm_cust_info' , 'U') is not null
    drop table bronze.crm_cust_info;
@@ -26,6 +28,10 @@ create table bronze.crm_cust_info(
 	cst_createdate date
 );
 
+-- =============================================================
+---- Creating 'bronze.crm_prd_info' Table ----
+-- =============================================================
+
 if object_id('bronze.crm_prd_info' , 'U') is not null
    drop table bronze.crm_prd_info;
 create table bronze.crm_prd_info(
@@ -37,6 +43,10 @@ create table bronze.crm_prd_info(
 	prd_start_dt date,
 	prd_end_dt date
 );
+
+-- =============================================================
+---- Creating 'bronze.crm_sales_details' Table ----
+-- =============================================================
 
 if object_id('bronze.crm_sales_details' , 'U') is not null
    drop table bronze.crm_sales_details;
@@ -52,6 +62,9 @@ create table bronze.crm_sales_details(
 	sls_price int
 );
  
+-- =============================================================
+---- Creating 'bronze.erp_CUST_AZ12' Table ----
+-- =============================================================
 
 if object_id('bronze.erp_CUST_AZ12' , 'U') is not null
    drop table bronze.erp_CUST_AZ12;
@@ -61,12 +74,20 @@ bdate date,
 gen varchar(10)
 );
 
+-- =============================================================
+---- Creating 'bronze.erp_LOC_A101' Table ----
+-- =============================================================
+
 if object_id('bronze.erp_LOC_A101' , 'U') is not null
    drop table bronze.erp_LOC_A101;
 create table bronze.erp_LOC_A101(
 cid varchar(30),
 cntry varchar(20)
 );
+
+-- =============================================================
+---- Creating 'bronze.erp_PX_CAT_G1V2' Table ----
+-- =============================================================
 
 if object_id('bronze.erp_PX_CAT_G1V2' , 'U') is not null
    drop table bronze.erp_PX_CAT_G1V2;
