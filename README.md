@@ -42,18 +42,26 @@ data-warehouse-project/
 │
 
 ├── docs/                               # Project documentation and architecture details
+
 │   ├── etl.drawio                      # Draw.io file showing different ETL techniques and methods
+
 │   ├── data_architecture.drawio        # Draw.io file illustrating the project's data architecture
+
 │   ├── data_catalog.md                 # Catalog of datasets, including field descriptions and metadata
+
 │   ├── data_flow.drawio                # Draw.io file for the data flow diagram
+
 │   ├── data_models.drawio              # Draw.io file for data models (star schema)
+
 │   ├── naming-conventions.md           # Consistent naming guidelines for tables, columns, and files
 │
 
 ├── scripts/                            # SQL scripts for ETL and transformations
 
 │   ├── bronze/                         # Scripts for extracting and loading raw data from source systems
+
 │   ├── silver/                         # Scripts for data cleansing, normalization, and transformation
+
 │   ├── gold/                           # Scripts for creating analytical models and star schema
 │
 
