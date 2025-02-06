@@ -40,6 +40,7 @@ data-warehouse-project/
 │
 ├── datasets/                           # Raw datasets used for the project (ERP and CRM data)
 │
+
 ├── docs/                               # Project documentation and architecture details
 │   ├── etl.drawio                      # Draw.io file showing different ETL techniques and methods
 │   ├── data_architecture.drawio        # Draw.io file illustrating the project's data architecture
@@ -48,16 +49,23 @@ data-warehouse-project/
 │   ├── data_models.drawio              # Draw.io file for data models (star schema)
 │   ├── naming-conventions.md           # Consistent naming guidelines for tables, columns, and files
 │
+
 ├── scripts/                            # SQL scripts for ETL and transformations
+
 │   ├── bronze/                         # Scripts for extracting and loading raw data from source systems
 │   ├── silver/                         # Scripts for data cleansing, normalization, and transformation
 │   ├── gold/                           # Scripts for creating analytical models and star schema
 │
+
 ├── tests/                              # Test scripts and quality checks for data integrity
 │
+
 ├── README.md                           # Project overview, setup instructions, and key information
+
 ├── LICENSE                             # License information for the repository (MIT License)
+
 ├── .gitignore                          # Files and directories to be ignored by Git
+
 └── requirements.txt                    # Project dependencies and libraries
 
 ## 🛡️ License
