@@ -18,7 +18,6 @@ Welcome to the Data Warehouse and Analytics Project repository! This project dem
 - **Datasets**: Access to CSV files (ERP and CRM data).
 - **SQL Server**: SQL Server Express & SSMS.
 - **GitHub**: Manage, version, and collaborate on code.
-- **Notion**: Project management and organization.
   
 ## 🚀 Project Requirements
 ### Data Warehouse (Data Engineering)
