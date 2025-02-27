@@ -1,0 +1,297 @@
+/*
+=============================================================
+ SQL Analysis Script :- Customer(Dimension), Product(Dimension), and Sales(Fact) Insights
+=============================================================
+Script Purpose:
+    This script provides analytical queries for customer, product, and sales data.
+    It includes:
+    - Aggregating sales by product, region, and customer.
+    - Calculating total and average sales, trends, and top performers.
+    - Analyzing product categories, return rates, and purchase frequencies.
+
+    These queries offer insights for business intelligence and reporting.
+
+Usage:
+    Execute these queries to analyze sales performance and customer behaviors.
+
+=============================================================
+*/
+
+
+
+---==================================
+-- 1. Total Sales by Product
+-- Find the total sales (sum of sales amount) for each product in the dataset.
+---==================================
+
+select
+p.product_name , sum(s.sales) as total_sales
+from gold.fact_sales as s
+left join gold.dim_product as p
+on s.product_key = p.product_key
+group by p.product_name
+order by sum(s.sales) desc
+
+
+---==================================
+-- 2.Top 5 Products by Total Sales
+-- Identify the top 5 products with the highest total sales.
+---==================================
+
+select top 5
+p.product_name , sum(s.sales) as total_sales
+from gold.fact_sales as s
+left join gold.dim_product as p
+on s.product_key = p.product_key
+group by p.product_name
+order by sum(s.sales) desc
+
+
+---==================================
+-- 3.Average Sale per Customer
+-- Calculate the average sales amount per customer.
+---==================================
+
+
+select first_name + ' ' + last_name as full_name , avg(sales) as avg_sales
+from gold.fact_sales as s
+left join gold.dim_customers as c
+on s.customer_key = c.customer_key
+group by first_name , last_name
+order by avg_sales desc
+
+
+---==================================
+-- 4.Sales by Region
+-- If there’s a region column in your customer data, calculate the total sales by region..
+---==================================
+
+select country , sum(sales) as total_sales ,avg(sales) as avg_sales 
+from gold.fact_sales as s
+left join gold.dim_customers as c
+on s.customer_key = c.customer_key
+group by country
+order by avg_sales desc
+
+
+---==================================
+-- 5. Customer Purchase Frequency
+-- Find out how many times each customer has made a purchase.
+---==================================
+
+select customer_id , count(s.order_number) as total_orders , count(distinct s.order_number) as total_distinct_orders
+from gold.fact_sales as s
+left join gold.dim_customers as c
+on s.customer_key = c.customer_key
+group by customer_id
+order by total_orders desc 
+
+
+
+---==================================
+-- 6.Sales Trend Over Time
+-- Calculate total sales for each month in the dataset. This assumes you have a order_date column.
+---==================================
+
+select month(order_date) as month_num ,year(order_date) as years, sum(sales) as total_sales
+from gold.fact_sales
+where order_date is not null
+group by year(order_date) , month(order_date)
+order by years desc , month_num desc
+
+
+select datetrunc(month, order_date) as order_date, sum(sales) as total_sales
+from gold.fact_sales
+where order_date is not null
+group by datetrunc(month, order_date)
+order by order_date
+
+select format(order_date, 'MMM-yyyy') as orderdate, sum(sales) as total_sales
+from gold.fact_sales
+where order_date is not null
+group by format(order_date, 'MMM-yyyy')
+order by total_sales desc
+
+
+---==================================
+-- 7. Customer's Most Frequently Purchased Product
+-- For each customer, determine which product they have bought the most.
+---==================================
+
+select first_name + ' ' + last_name as full_name ,product_name , count(product_name) as order_count
+from gold.fact_sales as s
+left join gold.dim_customers as c
+on s.customer_key = c.customer_key
+left join gold.dim_product as p
+on s.product_key = p.product_key
+group by first_name , last_name , product_name
+order by order_count desc
+
+
+---==================================
+-- 8. Sales by Product Category
+-- If you have a product category column, calculate total sales per category.
+---==================================
+
+
+select
+p.category , sum(s.sales) as total_sales
+from gold.fact_sales as s
+left join gold.dim_product as p
+on s.product_key = p.product_key
+group by p.category
+order by sum(s.sales) desc
+
+
+
+---==================================
+-- 9. Top Customers by Total Spend
+-- Find the top 10 customers who have spent the most money.
+---==================================
+
+select top 10
+customer_id,
+first_name + ' ' + last_name as full_name , sum(sales) as total_sales
+from gold.fact_sales as s
+left join gold.dim_customers as c
+on s.customer_key = c.customer_key
+group by customer_id , first_name , last_name
+order by total_sales desc
+
+
+---==================================
+-- 10. Sales by Product Category and Sub-Catergory
+-- If you have a product category and sub-category column, calculate total sales per category.
+---==================================
+
+select
+p.category, sub_category , sum(s.sales) as total_sales
+from gold.fact_sales as s
+left join gold.dim_product as p
+on s.product_key = p.product_key
+group by p.category , sub_category
+order by category
+
+
+---==================================
+-- 11.Calculate the total sales per month
+-- And Running total of sales over time.
+---==================================
+select order_date , 
+	   total_sales , 
+	   sum(total_sales) over(partition by year(order_date) order by order_date) as running_sales
+from (
+	select 
+	datetrunc(month , order_date) as order_date , 
+	sum(sales) as total_sales
+	from gold.fact_sales 
+	where order_date is not null
+	group by datetrunc(month , order_date)
+) t
+
+---==================================
+-- 12.Analyze the total perfomance of products by comaparing their sales
+-- to both average sales performance and their previous year sales.
+---==================================
+
+with prdct_sales as( 
+select year(order_date) as order_year, 
+product_name,
+sum(sales) as curr_sales
+from gold.fact_sales as s 
+left join gold.dim_product as p
+on p.product_key = s.product_key
+where order_date is not null
+group by product_name , year(order_date)
+),
+-- Segmentation
+product_segment as(
+select order_year , product_name , curr_sales,
+avg(curr_sales) over(partition by product_name) as avg_sales,
+curr_sales - avg(curr_sales) over(partition by product_name) as avg_diff,
+-- Average Sales
+case when curr_sales - avg(curr_sales) over(partition by product_name) < 0 then 'Below Avg'
+     when curr_sales - avg(curr_sales) over(partition by product_name) > 0 then 'Above Avg'
+	 else 'Avg' end as sales_flag,
+-- Previous Year Sales
+lag(curr_sales) over(partition by product_name order by order_year) as pre_year_sale,
+case when curr_sales -lag(curr_sales) over(partition by product_name order by order_year) < 0 then 'Decrease'
+     when curr_sales - lag(curr_sales) over(partition by product_name order by order_year) > 0 then 'Increase'
+	 else 'No Change' end as sales_flag_year
+from prdct_sales
+)
+ select sales_flag,count(product_name) as total_customer 
+ from product_segment
+ group by sales_flag
+
+
+---==================================
+-- 13. Which Category contribute most to overall sales?
+---==================================
+SELECT p.category,
+	   SUM(s.sales) AS total_sales,
+       format((SUM(s.sales) * 1.0 / (select sum(sales) from gold.fact_sales) * 100),'N2') + '%'   as sales_percentage
+FROM gold.fact_sales AS s
+LEFT JOIN gold.dim_product AS p
+    ON s.product_key = p.product_key
+GROUP BY p.category
+ORDER BY total_sales DESC
+
+
+---==================================
+-- 14. Which Country contribute most to overall sales?
+---==================================
+
+
+SELECT c.country,
+	   SUM(s.sales) AS total_sales,
+       format((SUM(s.sales) * 1.0 / (select sum(sales) from gold.fact_sales) * 100),'N2') + '%'   as sales_percentage
+FROM gold.fact_sales AS s
+LEFT JOIN gold.dim_customers AS c
+    ON s.customer_key = c.customer_key
+GROUP BY c.country
+ORDER BY total_sales DESC
+
+---==================================
+--15. Segment products into cost range and
+-- count how many product fall into each segment
+---==================================
+select cost_range , count(product_key) as no_of_products
+from(
+select product_key,
+case when cost < 100 then 'Below 100'
+	 when cost between 100 and 500 then '100-500'
+     when cost between 500 and 1000 then '500-1000'
+	 else 'Above 1000' end as cost_range
+from gold.dim_product
+) t group by cost_range order by no_of_products
+
+
+---==================================
+--16. Group customers into 3 category based on spending behavior:
+     --VIP: Customers with atleast 12 months of history and spending more than 5000
+	 --Regular: Customers with atleast 12 months of history and spending less than 5000
+	 --New: -- Customers with lifespan less than 12 months
+-- count how many product fall into each segment
+---==================================
+
+with cst_info as(
+SELECT c.customer_key,
+	   SUM(s.sales) AS total_sales,
+       min(order_date) as first_order,
+	   max(order_date) as last_order
+FROM gold.fact_sales AS s
+LEFT JOIN gold.dim_customers AS c
+    ON s.customer_key = c.customer_key
+GROUP BY c.customer_key
+),
+-- Segmentation
+cust_segment as(select * , 
+datediff(month , first_order , last_order) as cst_his,
+case when datediff(month , first_order , last_order) >= 12 and total_sales > 5000 then 'VIP'
+	 when datediff(month , first_order , last_order) >= 12 and total_sales <= 5000 then 'Regular'
+	 else 'New' end as cst_segment
+from cst_info)
+
+select cst_segment , count(customer_key) as total_customer from cust_segment
+group by cst_segment
