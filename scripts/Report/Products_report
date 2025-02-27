@@ -1,0 +1,100 @@
+/*
+=============================================================
+Customer Report
+=============================================================
+Script Purpose:
+    This script shows Key Product matrics and behaviour 
+    Highlights:
+    - Gathers essential columns such as product names , category , sub-category and cost.
+    - Segments products by revenue to identify High-Performers , Average-Performers , Low-Performers.
+    - Aggregate customer-level matrics.
+	   1.total order place.
+	   2.total sales.
+	   3.total quantity sold.
+	   4.total customer(unique).
+	   5.lifespan(months between first and last sale)
+    - Calculates valueable KPI's:
+	   1.recency (months since last sale).
+	   2.average order revenue(AOR).
+	   3.average monthly revenue.
+
+Usage:
+    Run these queries to create a view of Product Report.
+
+-- =============================================================
+*/
+
+if object_id('gold.report_products' , 'V') is not null
+   drop view gold.report_products
+go
+
+create view gold.report_products as
+with base_query as(
+---==================================
+-- Base Query:- Retrieves core columns from table
+---==================================
+select 
+	p.product_key,
+	p.product_name,
+	p.category,
+	p.sub_category,
+	p.cost,
+	s.order_number,
+	s.order_date,
+	s.customer_key,
+	s.sales,
+	s.quantity
+from gold.fact_sales as s
+left join gold.dim_product as p
+on p.product_key = s.product_key
+),
+---==================================
+-- Product Aggregation Query:- Summarizes key matrics at the product-level
+---==================================
+product_aggregation as(
+select
+	product_key,
+	product_name,
+	category,
+	sub_category,
+	cost,
+	datediff(month , min(order_date) , max(order_date)) as lifespan,
+	max(order_date) as last_sale_date,
+	count(order_number) as total_orders,
+	count(distinct customer_key) as total_customers,
+	sum(sales) as total_sales,
+	sum(quantity) as total_quantity,
+	round(avg(cast(coalesce(sales , 0) as float) / coalesce(quantity , 0) ), 2) as avg_selling_price
+from base_query
+group by 
+	product_key,
+	product_name,
+	category,
+	sub_category,
+	cost
+)
+
+select 
+  product_key,
+  product_name,
+  category,
+  sub_category,
+  cost,
+  last_sale_date,
+  datediff(month , last_sale_date , getdate()) as recency,
+  case when total_sales > 50000 then 'High-Performer'
+	   when total_sales >= 10000 then 'Average-Performer'
+	   else 'Low-Performer' end as product_segment,
+  lifespan,
+  total_customers,
+  total_orders,
+  total_quantity,
+  total_sales,
+-- Compute Average Order Value (AOV)
+  case when total_orders = 0 then 0
+	   else total_sales/total_orders end as AOM,
+-- Compute Average Monthly Spend (AMS)
+  case when lifespan = 0 then 0
+	   else total_sales/lifespan end as AMS
+from product_aggregation
+
